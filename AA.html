@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ADMIN DASHBOARD</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #111; color: white; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #444; padding: 12px; text-align: center; }
+        th { background: #f1c40f; color: black; }
+        .win { color: #2ecc71; } .loss { color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <h1>🖥️ ระบบหลังบ้าน (Firebase Online)</h1>
+    <div id="stats">กำลังโหลดข้อมูล...</div>
+    
+    <h3>ประวัติการเล่นล่าสุด</h3>
+    <table id="logTable">
+        <thead><tr><th>เวลา</th><th>เบอร์โทร</th><th>รายการ</th><th>ยอด</th></tr></thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBxOPmuzr7tqnz3v1pLCq3ehHtUEKsTjNc",
+            authDomain: "grandslotonline.firebaseapp.com",
+            databaseURL: "https://grandslotonline-default-rtdb.firebaseio.com",
+            projectId: "grandslotonline",
+            storageBucket: "grandslotonline.firebasestorage.app",
+            messagingSenderId: "649961955570",
+            appId: "1:649961955570:web:218ad27d02d0dc83a3706b"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        db.ref('users').on('value', (snap) => {
+            const count = snap.numChildren();
+            document.getElementById('stats').textContent = `ผู้เล่นทั้งหมด: ${count} คน`;
+        });
+
+        db.ref('logs').limitToLast(15).on('value', (snap) => {
+            const logs = snap.val() || {};
+            const html = Object.values(logs).reverse().map(l => `
+                <tr>
+                    <td>${l.time}</td><td>${l.phone}</td>
+                    <td>${l.type}</td><td class="${l.type === 'Win' ? 'win' : 'loss'}">${l.amount}</td>
+                </tr>
+            `).join('');
+            document.querySelector('#logTable tbody').innerHTML = html;
+        });
+    </script>
+</body>
+</html>
